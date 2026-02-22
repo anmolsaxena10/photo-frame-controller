@@ -50,7 +50,7 @@ jobs:
         working-directory: image-builder
         run: |
           chmod +x build.sh
-          ./build.sh
+          sudo ./build.sh
 
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
