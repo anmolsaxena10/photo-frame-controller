@@ -14,20 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm,arm64
+      # 1️⃣ Enable binfmt inside Docker daemon
+      - name: Enable multi-arch binfmt
+        run: |
+          docker run --privileged --rm tonistiigi/binfmt --install all
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      # 2️⃣ Build image
       - name: Build OS image
         working-directory: image-builder
         run: |
           chmod +x build.sh
           ./build.sh
 
+      # 3️⃣ Upload artifact
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
         with:

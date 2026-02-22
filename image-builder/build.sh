@@ -22,5 +22,3 @@ cp -r ../../service photo-frame/files/photo-frame-controller/
 echo "Starting pi-gen Docker build..."
 
 sudo ./build-docker.sh
-
-echo "Build complete."
