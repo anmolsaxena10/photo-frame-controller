@@ -14,19 +14,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1️⃣ Enable binfmt inside Docker daemon
-      - name: Enable multi-arch binfmt
+      - name: Install required packages
         run: |
-          docker run --privileged --rm tonistiigi/binfmt --install all
+          sudo apt update
+          sudo apt install -y \
+            git \
+            coreutils \
+            quilt \
+            parted \
+            qemu-user-static \
+            debootstrap \
+            zerofree \
+            zip \
+            dosfstools \
+            e2fsprogs \
+            libarchive-tools \
+            libcap2-bin \
+            rsync \
+            grep \
+            udev \
+            xz-utils \
+            curl \
+            xxd \
+            file \
+            kmod \
+            bc \
+            binfmt-support \
+            ca-certificates \
+            fdisk \
+            gpg \
+            pigz \
+            arch-test
 
-      # 2️⃣ Build image
       - name: Build OS image
         working-directory: image-builder
         run: |
           chmod +x build.sh
           ./build.sh
 
-      # 3️⃣ Upload artifact
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
         with:

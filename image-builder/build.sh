@@ -19,6 +19,4 @@ cp ../../requirements.txt photo-frame/files/photo-frame-controller/
 cp -r ../../config photo-frame/files/photo-frame-controller/
 cp -r ../../service photo-frame/files/photo-frame-controller/
 
-echo "Starting pi-gen Docker build..."
-
-sudo ./build-docker.sh
+./build.sh
