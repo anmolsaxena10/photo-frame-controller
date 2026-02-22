@@ -56,10 +56,11 @@ jobs:
           sudo ./build.sh
 
       # Debug (optional but useful)
-      - name: List generated images
+      - name: Show deploy contents
         run: |
-          find image-builder -name "*.img"
-
+          echo "Contents of deploy folder:"
+          sudo ls -lh image-builder/pi-gen/deploy || true
+    
       # Upload full deploy directory (safer than wildcard)
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
