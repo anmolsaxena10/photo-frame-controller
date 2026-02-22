@@ -1,0 +1,4 @@
+RPi.GPIO
+pillow
+requests
+bluezero

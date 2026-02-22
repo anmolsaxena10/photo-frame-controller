@@ -1,0 +1,12 @@
+[Unit]
+Description=E-Ink Photo Frame Service
+After=network.target bluetooth.target
+
+[Service]
+User=saxanmol
+WorkingDirectory=/opt/photo-frame-controller
+ExecStart=/opt/photo-frame-controller/venv/bin/python app/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

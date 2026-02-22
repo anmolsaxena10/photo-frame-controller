@@ -1,0 +1,65 @@
+name: Build Photo Frame Controller OS Image
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            git \
+            coreutils \
+            quilt \
+            parted \
+            qemu-user-static \
+            debootstrap \
+            zerofree \
+            zip \
+            dosfstools \
+            e2fsprogs \
+            libarchive-tools \
+            libcap2-bin \
+            rsync \
+            grep \
+            udev \
+            xz-utils \
+            curl \
+            xxd \
+            file \
+            kmod \
+            bc \
+            binfmt-support \
+            ca-certificates \
+            fdisk \
+            gpg \
+            pigz \
+            arch-test
+
+      - name: Enable binfmt
+        run: |
+          sudo update-binfmts --enable
+          sudo systemctl restart systemd-binfmt
+
+      - name: Build OS image
+        working-directory: image-builder
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Upload OS Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: photo-frame-controller-os-image
+          path: image-builder/pi-gen/deploy/*.img
