@@ -1,10 +1,10 @@
 name: Build Photo Frame Controller OS Image
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
-  workflow_dispatch:
 
 jobs:
   build:
@@ -12,45 +12,15 @@ jobs:
     timeout-minutes: 180
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            git \
-            coreutils \
-            quilt \
-            parted \
-            qemu-user-static \
-            debootstrap \
-            zerofree \
-            zip \
-            dosfstools \
-            e2fsprogs \
-            libarchive-tools \
-            libcap2-bin \
-            rsync \
-            grep \
-            udev \
-            xz-utils \
-            curl \
-            xxd \
-            file \
-            kmod \
-            bc \
-            binfmt-support \
-            ca-certificates \
-            fdisk \
-            gpg \
-            pigz \
-            arch-test
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm,arm64
 
-      - name: Enable binfmt
-        run: |
-          sudo update-binfmts --enable
-          sudo systemctl restart systemd-binfmt
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build OS image
         working-directory: image-builder
