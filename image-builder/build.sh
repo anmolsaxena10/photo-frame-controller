@@ -13,10 +13,14 @@ rm -rf photo-frame
 cp -r ../stage-photo-frame photo-frame
 cp ../config config
 
-mkdir -p photo-frame/files/photo-frame-controller
-cp -r ../../app photo-frame/files/photo-frame-controller/
-cp ../../requirements.txt photo-frame/files/photo-frame-controller/
-cp -r ../../config photo-frame/files/photo-frame-controller/
-cp -r ../../service photo-frame/files/photo-frame-controller/
+# Bundle application files into the substage's files directory
+mkdir -p photo-frame/00-install/files/photo-frame-controller
+cp -r ../../app photo-frame/00-install/files/photo-frame-controller/
+cp ../../requirements.txt photo-frame/00-install/files/photo-frame-controller/
+cp -r ../../config photo-frame/00-install/files/photo-frame-controller/
+cp -r ../../data photo-frame/00-install/files/photo-frame-controller/
+
+# Copy the systemd service file directly into files/ for easy reference
+cp ../../service/photo-frame-controller.service photo-frame/00-install/files/
 
 ./build.sh

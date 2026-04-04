@@ -1,3 +1,10 @@
+import sys
+import os
+
+# Add the waveshare EPD library to the Python path.
+# The package lives at waveshare_epd/lib/waveshare_epd/ (vendor structure).
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'waveshare_epd', 'lib'))
+
 from state_manager import StateManager
 from display_manager import DisplayManager
 from ble_manager import BLEManager
