@@ -4,7 +4,9 @@ set -e
 echo "Building photo-frame-controller OS image..."
 
 if [ ! -d "pi-gen" ]; then
-  git clone https://github.com/RPi-Distro/pi-gen.git
+  # Pin to bookworm branch — master now defaults to Trixie which requires
+  # qemu-user-binfmt (conflicts with qemu-user-static on Ubuntu 22.04 CI).
+  git clone --branch bookworm https://github.com/RPi-Distro/pi-gen.git
 fi
 
 cd pi-gen

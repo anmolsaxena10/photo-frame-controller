@@ -25,7 +25,6 @@ jobs:
             quilt \
             parted \
             qemu-user-static \
-            qemu-user-binfmt \
             debootstrap \
             zerofree \
             zip \
