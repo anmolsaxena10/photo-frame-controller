@@ -16,6 +16,22 @@ jobs:
         uses: actions/checkout@v4
 
       # Install dependencies required by pi-gen
+      - name: Cache pi-gen sources
+        uses: actions/cache@v4
+        with:
+          path: image-builder/pi-gen
+          key: pi-gen-${{ runner.os }}-${{ hashFiles('image-builder/build.sh') }}
+          restore-keys: |
+            pi-gen-${{ runner.os }}-
+
+      - name: Cache Apt and Pip packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            /var/cache/apt/archives
+          key: deps-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
       - name: Install required packages
         run: |
           sudo apt update
@@ -47,6 +63,7 @@ jobs:
             gpg \
             pigz \
             arch-test
+
 
       # Build the OS image (pi-gen requires root)
       - name: Build OS image

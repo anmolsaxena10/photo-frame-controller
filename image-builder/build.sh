@@ -15,14 +15,16 @@ rm -rf photo-frame
 cp -r ../stage-photo-frame photo-frame
 cp ../config config
 
-# Bundle application files into the substage's files directory
-mkdir -p photo-frame/00-install/files/photo-frame-controller
-cp -r ../../app photo-frame/00-install/files/photo-frame-controller/
-cp ../../requirements.txt photo-frame/00-install/files/photo-frame-controller/
-cp -r ../../config photo-frame/00-install/files/photo-frame-controller/
-cp -r ../../data photo-frame/00-install/files/photo-frame-controller/
+# PI-GEN PATTERN: Put files at the stage root, so any substage can access them via ${STAGE_DIR}/files/
+mkdir -p photo-frame/files/photo-frame-controller
+cp -r ../../app photo-frame/files/photo-frame-controller/
+cp ../../requirements.txt photo-frame/files/photo-frame-controller/
+cp -r ../../config photo-frame/files/photo-frame-controller/
+cp -r ../../data photo-frame/files/photo-frame-controller/
 
-# Copy the systemd service file directly into files/ for easy reference
-cp ../../service/photo-frame-controller.service photo-frame/00-install/files/
+# Copy the systemd service file to the stage root files/ directory
+cp ../../service/photo-frame-controller.service photo-frame/files/
 
-./build.sh
+# CONTINUE=1 allows pi-gen to resume from the last completed stage if the work dir is preserved
+CONTINUE=1 ./build.sh
+
