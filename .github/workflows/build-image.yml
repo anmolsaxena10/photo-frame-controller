@@ -77,6 +77,15 @@ jobs:
         run: |
           echo "Contents of deploy folder:"
           sudo ls -lh image-builder/pi-gen/deploy || true
+
+      # The GitHub cache post-job runs as a regular user, but pi-gen and apt create
+      # files owned by root. We need to reset ownership so they can be cached.
+      - name: Fix permissions for caching
+        if: always()
+        run: |
+          sudo chown -R $USER:$USER ~/.cache/pip || true
+          sudo chown -R $USER:$USER /var/cache/apt/archives || true
+          sudo chown -R $USER:$USER image-builder/pi-gen || true
     
       # Upload full deploy directory (safer than wildcard)
       - name: Upload OS Image
