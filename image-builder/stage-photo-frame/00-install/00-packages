@@ -5,4 +5,4 @@ bluez
 bluetooth
 libjpeg-dev
 libopenjp2-7
-libtiff5
+libtiff-dev
