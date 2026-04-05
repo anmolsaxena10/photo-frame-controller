@@ -16,21 +16,11 @@ install -m 644 \
   "${STAGE_DIR}/files/photo-frame-controller.service" \
   "${ROOTFS_DIR}/etc/systemd/system/photo-frame-controller.service"
 
-# Handle SPI for the Waveshare display HAT.
-# For Bookworm, the boot directory is mounted at /boot/firmware.
-if [ -d "${ROOTFS_DIR}/boot/firmware" ]; then
-  CONFIG_FILE="${ROOTFS_DIR}/boot/firmware/config.txt"
-else
-  CONFIG_FILE="${ROOTFS_DIR}/boot/config.txt"
-fi
-
-# Enable SPI by adding it to config.txt if not already present
-if ! grep -q "dtparam=spi=on" "${CONFIG_FILE}"; then
-  echo "dtparam=spi=on" >> "${CONFIG_FILE}"
-fi
-
 # Run setup commands inside the image rootfs
 on_chroot << EOF
+# Enable SPI using raspi-config to avoid dealing with boot partition paths
+raspi-config nonint do_spi 0
+
 cd /opt/photo-frame-controller
 python3 -m venv venv
 /opt/photo-frame-controller/venv/bin/pip install -r requirements.txt
