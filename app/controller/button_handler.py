@@ -3,7 +3,7 @@ import time
 import threading
 try:
     import RPi.GPIO as GPIO
-except ImportError:
+except Exception as e:
     GPIO = None
     
 logger = logging.getLogger(__name__)

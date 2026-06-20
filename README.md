@@ -42,8 +42,8 @@ You do not need the physical E-Ink display to test the web interface and API loc
 ### Running Locally
 To test the backend and the Web UX without triggering hardware errors:
 ```bash
-# This starts the FastAPI server locally on port 8000
-python3 app/main.py
+# This starts the FastAPI server locally on port 8000, bypassing hardware (GPIO/AP Mode/EPD)
+ENV=dev python3 app/main.py
 ```
 
 - **Open Web UX:** Open your browser and navigate to `http://localhost:8000`. 

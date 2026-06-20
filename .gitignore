@@ -50,6 +50,12 @@ image-builder/pi-gen/
 # pi-gen build output
 image-builder/work/
 image-builder/deploy/
+
+# ----------------------------
+# Application Data
+# ----------------------------
+data/
+
 image-builder/pi-gen/work/
 image-builder/pi-gen/deploy/
 

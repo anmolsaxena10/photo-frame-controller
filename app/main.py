@@ -4,6 +4,12 @@ import asyncio
 import logging
 import uvicorn
 
+# Add project root to sys.path so absolute imports like 'from app.controller...' work
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Add the waveshare EPD library to the Python path.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'waveshare_epd', 'lib'))
 
 from app.controller.state_manager import StateManager, FrameState
@@ -32,9 +38,16 @@ async def main():
     scheduler = Scheduler(state, layout)
     
     # 2. Boot Logic
+    is_dev = os.environ.get("ENV", "prod").lower() == "dev"
+    
     if state.current_mode == FrameState.FIRST_BOOT or state.current_mode == FrameState.AP_SETUP:
-        ssid, password = wifi.start_ap_mode()
-        url = f"http://192.168.4.1"
+        if is_dev:
+            logger.info("[DEV MODE] Skipping hardware AP creation.")
+            ssid, password = "DEV_AP", "password"
+            url = "http://localhost:8000"
+        else:
+            ssid, password = wifi.start_ap_mode()
+            url = f"http://192.168.4.1"
         
         # Start a thread to show the setup screen so we don't block server start
         import threading

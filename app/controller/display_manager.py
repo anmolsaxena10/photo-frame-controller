@@ -7,9 +7,9 @@ import qrcode
 
 try:
     from waveshare_epd import epd7in3f
-except ImportError:
+except Exception as e:
     epd7in3f = None
-    logging.warning("waveshare_epd not found, using dummy display driver.")
+    logging.warning(f"waveshare_epd could not be loaded ({e}), using dummy display driver.")
 
 logger = logging.getLogger(__name__)
 
