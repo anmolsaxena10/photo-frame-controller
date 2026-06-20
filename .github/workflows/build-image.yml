@@ -1,10 +1,10 @@
 name: Build Photo Frame Controller OS Image
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
-  workflow_dispatch:
 
 jobs:
   build:
@@ -15,7 +15,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Cache pi-gen state
+        uses: actions/cache@v4
+        id: pigen-cache
+        with:
+          path: pigen-state.tar.zst
+          key: pigen-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            pigen-${{ runner.os }}-
+
+      - name: Restore pi-gen state
+        if: steps.pigen-cache.outputs.cache-hit == 'true'
+        run: |
+          echo "Restoring previous build state..."
+          sudo tar -I zstd -xf pigen-state.tar.zst || true
+
+      - name: Install required packages
         run: |
           sudo apt update
           sudo apt install -y \
@@ -47,19 +62,33 @@ jobs:
             pigz \
             arch-test
 
-      - name: Enable binfmt
-        run: |
-          sudo update-binfmts --enable
-          sudo systemctl restart systemd-binfmt
 
+      # Build the OS image (pi-gen requires root)
       - name: Build OS image
         working-directory: image-builder
         run: |
           chmod +x build.sh
-          ./build.sh
+          sudo ./build.sh
 
+      # Debug (optional but useful)
+      - name: Show deploy contents
+        run: |
+          echo "Contents of deploy folder:"
+          sudo ls -lh image-builder/pi-gen/deploy || true
+
+      # The GitHub cache post-job runs as a regular user, but pi-gen creates
+      # special device files (/dev/null, etc) which crash the cache extractor.
+      # We pack the state ourselves using sudo so the cache action just handles one file.
+      - name: Save pi-gen state
+        if: always()
+        run: |
+          echo "Packing build state for caching..."
+          # Exclude deploy so we don't cache the massive output zip unnecessarily
+          sudo tar -I "zstd -T0 -3" -cf pigen-state.tar.zst image-builder/pi-gen --exclude=image-builder/pi-gen/deploy || true
+    
+      # Upload full deploy directory (safer than wildcard)
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
         with:
           name: photo-frame-controller-os-image
-          path: image-builder/pi-gen/deploy/*.img
+          path: image-builder/pi-gen/deploy/

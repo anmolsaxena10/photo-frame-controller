@@ -1,3 +1,7 @@
 IMG_NAME='photo-frame-controller'
 STAGE_LIST="stage0 stage1 photo-frame"
 ENABLE_SSH=1
+FIRST_USER_NAME='saxanmol'
+FIRST_USER_PASS='saxanmol'
+CLEAN=0
+ZIP_COMPRESSION_LEVEL=1
