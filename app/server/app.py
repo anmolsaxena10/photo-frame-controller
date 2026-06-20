@@ -9,6 +9,11 @@ def create_app(state_manager) -> FastAPI:
         docs_url="/api/docs"
     )
 
+    app.state.state_manager = state_manager
+    
+    from app.server.routes import system
+    app.include_router(system.router, prefix="/api/system", tags=["System"])
+
     # We will mount static files and add routers later in the implementation.
     web_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "web")
     os.makedirs(web_dir, exist_ok=True)
