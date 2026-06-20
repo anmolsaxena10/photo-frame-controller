@@ -1,7 +1,40 @@
 {
   "first_boot": true,
-  "mode": null,
   "wifi_configured": false,
-  "server_url": null,
-  "offline_images": []
+  "wifi_ssid": null,
+  "hostname": "photoframe",
+  "display_name": "My Photo Frame",
+  "ota": {
+    "auto_update": true,
+    "last_check": null,
+    "current_version": "1.0.0",
+    "mandatory_initial_done": false
+  },
+  "carousel": {
+    "mode": "sequential",
+    "refresh_interval_minutes": 240,
+    "current_index": 0,
+    "enabled": true
+  },
+  "immich": {
+    "enabled": false,
+    "server_url": null,
+    "api_key": null,
+    "album_id": null,
+    "sync_interval_minutes": 360,
+    "last_sync": null,
+    "last_sync_status": null
+  },
+  "widgets": {
+    "clock_enabled": false,
+    "weather_enabled": false
+  },
+  "auth": {
+    "enabled": false,
+    "pin_hash": null
+  },
+  "system": {
+    "reserved_space_mb": 500,
+    "ap_password": null
+  }
 }

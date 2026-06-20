@@ -1,4 +1,10 @@
 RPi.GPIO
 pillow
-requests
-bluezero
+spidev
+fastapi
+uvicorn[standard]
+httpx
+qrcode[pil]
+python-multipart
+aiofiles
+pydantic
