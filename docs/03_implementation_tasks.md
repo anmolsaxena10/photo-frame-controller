@@ -8,38 +8,38 @@ This document breaks down the technical design into actionable implementation ta
 *Goal: A working photo frame with OTA capabilities, WiFi setup, and a robust PWA editor for cropping/previewing images.*
 
 ### 1.1 Foundation & State Management
-- [ ] Define Pydantic models for the extended `state.json` schema (including `ota` and `widgets`).
-- [ ] Implement `StateManager` class to handle loading/saving `data/state.json`.
-- [ ] Implement default state copy mechanism.
-- [ ] Update `requirements.txt` with new dependencies (`fastapi`, `uvicorn`, `python-multipart`, `aiofiles`, `qrcode`, `httpx`).
-- [ ] Refactor `main.py` entry point to load state and initialize core classes.
+- [x] Define Pydantic models for the extended `state.json` schema (including `ota` and `widgets`).
+- [x] Implement `StateManager` class to handle loading/saving `data/state.json`.
+- [x] Implement default state copy mechanism.
+- [x] Update `requirements.txt` with new dependencies (`fastapi`, `uvicorn`, `python-multipart`, `aiofiles`, `qrcode`, `httpx`).
+- [x] Refactor `main.py` entry point to load state and initialize core classes.
 
 ### 1.2 Setup Screen Generation & AP Mode
-- [ ] Implement `WiFiManager.start_ap_mode()` (hostapd, dnsmasq, routing).
-- [ ] Implement `DisplayManager.show_setup_screen(ssid, password, url)`.
-- [ ] Use `Pillow` to generate the 800x480 setup layout and `qrcode`.
+- [x] Implement `WiFiManager.start_ap_mode()` (hostapd, dnsmasq, routing).
+- [x] Implement `DisplayManager.show_setup_screen(ssid, password, url)`.
+- [x] Use `Pillow` to generate the 800x480 setup layout and `qrcode`.
 
 ### 1.3 OTA Updater (Mandatory First-Boot)
-- [ ] Implement `OTAUpdater.check_for_updates()` hitting GitHub API.
-- [ ] Implement download, extract, and replace logic.
-- [ ] Create `/api/system/ota` endpoints in FastAPI.
-- [ ] Ensure systemd service has permissions to restart itself (`sudo systemctl restart photo-frame-controller`).
+- [x] Implement `OTAUpdater.check_for_updates()` hitting GitHub API.
+- [x] Implement download, extract, and replace logic.
+- [x] Create `/api/system/ota` endpoints in FastAPI.
+- [x] Ensure systemd service has permissions to restart itself (`sudo systemctl restart photo-frame-controller`).
 
 ### 1.4 Web App (PWA) Editor & Upload
-- [ ] Set up basic HTML/CSS shell with mobile-first bottom navigation.
-- [ ] Integrate Cropper.js (or similar) in the PWA for strict 800:480 cropping and rotation.
-- [ ] Implement `dither-worker.js` to process cropped image into the 7-color palette (Floyd-Steinberg algorithm).
-- [ ] Build the Preview UI to show the dithered result before upload.
-- [ ] Implement `/api/photos/upload` in FastAPI (accept multipart, save to disk, queue processing).
+- [x] Set up basic HTML/CSS shell with mobile-first bottom navigation.
+- [x] Integrate Cropper.js (or similar) in the PWA for strict 800:480 cropping and rotation.
+- [x] Implement `dither-worker.js` to process cropped image into the 7-color palette (Floyd-Steinberg algorithm).
+- [x] Build the Preview UI to show the dithered result before upload.
+- [x] Implement `/api/photos/upload` in FastAPI (accept multipart, save to disk, queue processing).
 
 ### 1.5 Layout Engine & Display
-- [ ] Implement `LayoutEngine` class. For Phase 1, it just composites the base image onto the canvas (preparation for widgets).
-- [ ] Implement `DisplayManager` to accept composited images from `LayoutEngine` and interface with Waveshare EPD.
-- [ ] Enforce 180-second minimum interval in `DisplayManager`.
+- [x] Implement `LayoutEngine` class. For Phase 1, it just composites the base image onto the canvas (preparation for widgets).
+- [x] Implement `DisplayManager` to accept composited images from `LayoutEngine` and interface with Waveshare EPD.
+- [x] Enforce 180-second minimum interval in `DisplayManager`.
 
 ### 1.6 Carousel & Reset
-- [ ] Implement `Scheduler._carousel_loop()` reading `refresh_interval` and `mode`.
-- [ ] Enhance `ButtonHandler` with debouncing and long-press detection (factory reset).
+- [x] Implement `Scheduler._carousel_loop()` reading `refresh_interval` and `mode`.
+- [x] Enhance `ButtonHandler` with debouncing and long-press detection (factory reset).
 
 ---
 
