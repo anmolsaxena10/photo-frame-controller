@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photo Frame Setup</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Cropper.js for image editing -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Photo Frame</h1>
+        </header>
+
+        <main id="content">
+            <!-- Setup Wizard / Upload View -->
+            <div id="upload-view" class="view active">
+                <h2>Upload Photos</h2>
+                <div class="upload-container">
+                    <input type="file" id="file-input" accept="image/*" multiple>
+                    <label for="file-input" class="btn primary">Select Photos</label>
+                </div>
+                
+                <div id="editor-modal" class="hidden">
+                    <div class="editor-content">
+                        <h3>Edit Photo</h3>
+                        <div class="cropper-container">
+                            <img id="image-to-crop" src="">
+                        </div>
+                        <div class="controls">
+                            <button id="btn-rotate" class="btn secondary">Rotate</button>
+                            <button id="btn-preview" class="btn secondary">Dither Preview</button>
+                            <button id="btn-upload" class="btn primary">Confirm & Upload</button>
+                        </div>
+                        <div class="preview-container hidden">
+                            <h4>7-Color E-Ink Preview</h4>
+                            <canvas id="dither-preview-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="gallery-view" class="view">
+                <h2>Gallery</h2>
+                <p>Gallery coming soon...</p>
+                <div id="gallery-grid" class="grid"></div>
+            </div>
+            
+            <div id="settings-view" class="view">
+                <h2>Settings</h2>
+                <div class="card">
+                    <h3>OTA Updates</h3>
+                    <button id="btn-check-update" class="btn secondary">Check for Updates</button>
+                    <p id="ota-status"></p>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="#" data-target="upload-view" class="nav-item active">Upload</a>
+            <a href="#" data-target="gallery-view" class="nav-item">Gallery</a>
+            <a href="#" data-target="settings-view" class="nav-item">Settings</a>
+        </nav>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
