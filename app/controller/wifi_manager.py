@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import string
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,18 @@ class WiFiManager:
         
         logger.info(f"Starting AP Mode: {ssid}")
         
+        # Unblock WiFi (regulatory domain may not be set yet on fresh boot)
+        subprocess.run(["rfkill", "unblock", "wifi"], check=False)
+        # Set regulatory domain to allow transmitting
+        subprocess.run(["iw", "reg", "set", "IN"], check=False)
+        
         # Stop NetworkManager from managing the interface while hostapd runs
         subprocess.run(["nmcli", "device", "set", self.interface, "managed", "no"], check=False)
+        
+        # Ensure interface is down before reconfiguring
+        subprocess.run(["ip", "link", "set", "dev", self.interface, "down"], check=False)
+        subprocess.run(["ip", "addr", "flush", "dev", self.interface], check=False)
+        time.sleep(1)
         
         # Configure IP address
         subprocess.run(["ip", "link", "set", "dev", self.interface, "up"], check=False)
