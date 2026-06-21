@@ -15,12 +15,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Cache the pi-gen work directory (rootfs from completed stages).
+      # Key includes a hash of config + stage scripts so the cache is invalidated
+      # when the image definition changes, but reused across app-only updates.
       - name: Cache pi-gen state
         uses: actions/cache@v4
         id: pigen-cache
         with:
           path: pigen-state.tar.zst
-          key: pigen-${{ runner.os }}-${{ github.ref }}
+          key: pigen-${{ runner.os }}-${{ hashFiles('image-builder/config', 'image-builder/stage-photo-frame/**') }}
           restore-keys: |
             pigen-${{ runner.os }}-
 
@@ -30,10 +33,23 @@ jobs:
           echo "Restoring previous build state..."
           sudo tar -I zstd -xf pigen-state.tar.zst || true
 
+      # Cache apt packages to avoid repeated downloads
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: ~/apt-cache
+          key: apt-${{ runner.os }}-${{ hashFiles('.github/workflows/build-image.yml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
       - name: Install required packages
         run: |
-          sudo apt update
-          sudo apt install -y \
+          # Use cached .deb files if available
+          if [ -d ~/apt-cache ]; then
+            sudo cp ~/apt-cache/*.deb /var/cache/apt/archives/ 2>/dev/null || true
+          fi
+          sudo apt-get update
+          sudo apt-get install -y \
             git \
             coreutils \
             quilt \
@@ -61,7 +77,16 @@ jobs:
             gpg \
             pigz \
             arch-test
+          # Save downloaded .debs for next run
+          mkdir -p ~/apt-cache
+          cp /var/cache/apt/archives/*.deb ~/apt-cache/ 2>/dev/null || true
 
+      # Cache the pi-gen repo clone to skip the git clone on every run
+      - name: Cache pi-gen repository
+        uses: actions/cache@v4
+        with:
+          path: image-builder/pi-gen/.git
+          key: pigen-repo-bookworm-${{ runner.os }}
 
       # Build the OS image (pi-gen requires root)
       - name: Build OS image
@@ -76,17 +101,17 @@ jobs:
           echo "Contents of deploy folder:"
           sudo ls -lh image-builder/pi-gen/deploy || true
 
-      # The GitHub cache post-job runs as a regular user, but pi-gen creates
-      # special device files (/dev/null, etc) which crash the cache extractor.
-      # We pack the state ourselves using sudo so the cache action just handles one file.
+      # Pack the pi-gen state for caching. We use sudo because pi-gen creates
+      # device files that crash the cache extractor otherwise.
       - name: Save pi-gen state
         if: always()
         run: |
           echo "Packing build state for caching..."
-          # Exclude deploy so we don't cache the massive output zip unnecessarily
-          sudo tar -I "zstd -T0 -3" -cf pigen-state.tar.zst image-builder/pi-gen --exclude=image-builder/pi-gen/deploy || true
-    
-      # Upload full deploy directory (safer than wildcard)
+          sudo tar -I "zstd -T0 -3" -cf pigen-state.tar.zst image-builder/pi-gen \
+            --exclude=image-builder/pi-gen/deploy \
+            --exclude=image-builder/pi-gen/.git || true
+
+      # Upload full deploy directory
       - name: Upload OS Image
         uses: actions/upload-artifact@v4
         with:

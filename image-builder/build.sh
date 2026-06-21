@@ -7,6 +7,9 @@ if [ ! -d "pi-gen" ]; then
   # Pin to bookworm branch — master now defaults to Trixie which requires
   # qemu-user-binfmt (conflicts with qemu-user-static on Ubuntu 22.04 CI).
   git clone --branch bookworm https://github.com/RPi-Distro/pi-gen.git
+elif [ -d "pi-gen/.git" ] && [ ! -f "pi-gen/build.sh" ]; then
+  # .git was restored from cache but working tree is missing — check it out
+  cd pi-gen && git checkout bookworm -- . && cd ..
 fi
 
 cd pi-gen
