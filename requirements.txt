@@ -1,4 +1,5 @@
-RPi.GPIO
+gpiozero
+lgpio
 pillow
 spidev
 fastapi

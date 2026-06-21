@@ -75,37 +75,51 @@ class DisplayManager:
         # Try to load a font
         try:
             # Bookworm typical paths
-            font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 48)
-            font_text = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
-            font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 32)
+            font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44)
+            font_text = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28)
+            font_bold = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
+            font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
         except Exception:
             # Fallback to default
             font_title = ImageFont.load_default()
             font_text = ImageFont.load_default()
             font_bold = ImageFont.load_default()
+            font_small = ImageFont.load_default()
             
-        # Draw text
-        draw.text((40, 40), "Welcome to Photo Frame!", fill=(0, 0, 0), font=font_title)
+        # Draw title
+        draw.text((40, 30), "Photo Frame Setup", fill=(0, 0, 0), font=font_title)
         
-        draw.text((40, 140), "To get started:", fill=(0, 0, 0), font=font_text)
+        # Draw setup instructions
+        draw.text((40, 110), "1. Scan QR to connect to WiFi", fill=(0, 0, 0), font=font_text)
         
-        draw.text((40, 200), "1. Connect to WiFi:", fill=(0, 0, 0), font=font_text)
-        draw.text((80, 250), f"Network:  {ssid}", fill=(200, 0, 0), font=font_bold)
-        draw.text((80, 300), f"Password: {password}", fill=(200, 0, 0), font=font_bold)
+        draw.text((60, 155), f"Network:  {ssid}", fill=(200, 0, 0), font=font_bold)
+        draw.text((60, 195), f"Password: {password}", fill=(200, 0, 0), font=font_bold)
         
-        draw.text((40, 380), "2. Open browser:", fill=(0, 0, 0), font=font_text)
-        draw.text((320, 380), url, fill=(0, 0, 128), font=font_bold)
+        draw.text((40, 260), "2. Open in browser:", fill=(0, 0, 0), font=font_text)
+        draw.text((60, 300), url, fill=(0, 0, 128), font=font_bold)
         
-        # Generate QR Code
-        qr = qrcode.QRCode(version=1, box_size=8, border=2)
-        qr.add_data(url)
+        draw.text((40, 365), "3. Enter your home WiFi details", fill=(0, 0, 0), font=font_text)
+        
+        draw.text((40, 430), "Then your frame will connect & restart.", fill=(100, 100, 100), font=font_small)
+        
+        # Generate WiFi QR Code (standard format for auto-connecting)
+        wifi_qr_data = f"WIFI:T:WPA;S:{ssid};P:{password};;"
+        qr = qrcode.QRCode(version=1, box_size=7, border=2)
+        qr.add_data(wifi_qr_data)
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
         
         # Paste QR code on the right side
-        qr_x = width - qr_img.width - 60
+        qr_x = width - qr_img.width - 40
         qr_y = (height - qr_img.height) // 2
         img.paste(qr_img, (qr_x, qr_y))
+        
+        # Label below QR
+        qr_label = "Scan to connect"
+        label_bbox = draw.textbbox((0, 0), qr_label, font=font_small)
+        label_w = label_bbox[2] - label_bbox[0]
+        label_x = qr_x + (qr_img.width - label_w) // 2
+        draw.text((label_x, qr_y + qr_img.height + 5), qr_label, fill=(80, 80, 80), font=font_small)
         
         # Display it
         self.show_image(img)

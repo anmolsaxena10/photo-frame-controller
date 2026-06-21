@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photo Frame Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .header__icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .scan-btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            background: #1a73e8;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .scan-btn:hover {
+            background: #1557b0;
+        }
+
+        .scan-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .scan-btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .scan-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .scan-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .network-list {
+            margin-top: 16px;
+            max-height: 240px;
+            overflow-y: auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .network-list.hidden {
+            display: none;
+        }
+
+        .network-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.15s;
+        }
+
+        .network-item:last-child {
+            border-bottom: none;
+        }
+
+        .network-item:hover {
+            background: #f8f9fa;
+        }
+
+        .network-item.selected {
+            background: #e8f0fe;
+        }
+
+        .network-item__name {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .network-item__meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .signal-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 1px;
+            height: 14px;
+        }
+
+        .signal-bars span {
+            width: 3px;
+            background: #ccc;
+            border-radius: 1px;
+        }
+
+        .signal-bars span.active {
+            background: #1a73e8;
+        }
+
+        .signal-bars span:nth-child(1) { height: 4px; }
+        .signal-bars span:nth-child(2) { height: 7px; }
+        .signal-bars span:nth-child(3) { height: 10px; }
+        .signal-bars span:nth-child(4) { height: 14px; }
+
+        .password-section {
+            margin-top: 16px;
+        }
+
+        .password-section.hidden {
+            display: none;
+        }
+
+        .selected-network {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .selected-network strong {
+            color: #1a73e8;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 48px 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #1a73e8;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            color: #888;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            background: #34a853;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .connect-btn:hover {
+            background: #2d8f47;
+        }
+
+        .connect-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .connect-btn .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .connect-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        .connect-btn.loading .btn-text {
+            display: none;
+        }
+
+        .error-msg {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #fdecea;
+            border-radius: 8px;
+            color: #c62828;
+            font-size: 14px;
+        }
+
+        .error-msg.hidden {
+            display: none;
+        }
+
+        .success-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .success-screen.hidden {
+            display: none;
+        }
+
+        .success-screen__icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .success-screen h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #34a853;
+        }
+
+        .success-screen p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .empty-state.hidden {
+            display: none;
+        }
+
+        .manual-ssid-section {
+            margin-top: 12px;
+        }
+
+        .manual-ssid-section.hidden {
+            display: none;
+        }
+
+        .manual-ssid-btn {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 0;
+            text-decoration: underline;
+        }
+
+        .manual-ssid-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            margin-top: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .manual-ssid-input:focus {
+            border-color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Setup Form -->
+        <div id="setup-form">
+            <div class="header">
+                <div class="header__icon">📷</div>
+                <h1>Welcome to Photo Frame</h1>
+                <p>Connect your frame to WiFi to get started</p>
+            </div>
+
+            <button class="scan-btn" id="scan-btn" onclick="scanNetworks()">
+                <span class="spinner"></span>
+                <span class="btn-text">📡 Scan for Networks</span>
+            </button>
+
+            <div class="network-list hidden" id="network-list"></div>
+
+            <div class="empty-state hidden" id="empty-state">
+                No networks found. Try scanning again.
+            </div>
+
+            <div class="manual-ssid-section" id="manual-ssid-section">
+                <button class="manual-ssid-btn" onclick="toggleManualSsid()">
+                    Enter network name manually
+                </button>
+                <input type="text" class="manual-ssid-input hidden" id="manual-ssid-input"
+                       placeholder="Network name (SSID)" oninput="onManualSsidInput()">
+            </div>
+
+            <div class="password-section hidden" id="password-section">
+                <p class="selected-network">
+                    Connecting to: <strong id="selected-ssid-label"></strong>
+                </p>
+                <div class="input-group">
+                    <input type="password" id="password-input" placeholder="WiFi password"
+                           onkeydown="if(event.key==='Enter') connectWifi()">
+                    <button class="toggle-password" onclick="togglePassword()">👁</button>
+                </div>
+                <button class="connect-btn" id="connect-btn" onclick="connectWifi()">
+                    <span class="spinner"></span>
+                    <span class="btn-text">🔗 Connect</span>
+                </button>
+            </div>
+
+            <div class="error-msg hidden" id="error-msg"></div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="success-screen hidden" id="success-screen">
+            <div class="success-screen__icon">✅</div>
+            <h2>Connected!</h2>
+            <p>
+                Your photo frame is now connecting to your home WiFi.
+                It will restart in a few seconds.
+            </p>
+            <p style="margin-top: 12px;">
+                Once restarted, access your frame at:<br>
+                <strong>http://photo-frame.local</strong><br>
+                <span style="font-size: 12px; color: #888;">
+                    or find its IP address on your router
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let selectedSsid = '';
+
+        async function scanNetworks() {
+            const btn = document.getElementById('scan-btn');
+            const list = document.getElementById('network-list');
+            const empty = document.getElementById('empty-state');
+            const error = document.getElementById('error-msg');
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            list.classList.add('hidden');
+            empty.classList.add('hidden');
+            error.classList.add('hidden');
+
+            try {
+                const resp = await fetch('/api/wifi/scan');
+                const data = await resp.json();
+
+                if (data.networks && data.networks.length > 0) {
+                    list.innerHTML = data.networks.map(n => `
+                        <div class="network-item" onclick="selectNetwork('${escapeHtml(n.ssid)}')">
+                            <span class="network-item__name">${escapeHtml(n.ssid)}</span>
+                            <div class="network-item__meta">
+                                <span>${n.security === 'Open' ? '🔓' : '🔒'}</span>
+                                ${signalBars(n.signal)}
+                            </div>
+                        </div>
+                    `).join('');
+                    list.classList.remove('hidden');
+                } else {
+                    empty.classList.remove('hidden');
+                }
+            } catch (e) {
+                showError('Failed to scan networks. Please try again.');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function selectNetwork(ssid) {
+            selectedSsid = ssid;
+
+            // Highlight selected
+            document.querySelectorAll('.network-item').forEach(el => {
+                el.classList.remove('selected');
+                if (el.querySelector('.network-item__name').textContent === ssid) {
+                    el.classList.add('selected');
+                }
+            });
+
+            // Show password section
+            document.getElementById('selected-ssid-label').textContent = ssid;
+            document.getElementById('password-section').classList.remove('hidden');
+            document.getElementById('password-input').focus();
+        }
+
+        function toggleManualSsid() {
+            const input = document.getElementById('manual-ssid-input');
+            input.classList.toggle('hidden');
+            if (!input.classList.contains('hidden')) {
+                input.focus();
+            }
+        }
+
+        function onManualSsidInput() {
+            const val = document.getElementById('manual-ssid-input').value.trim();
+            if (val) {
+                selectedSsid = val;
+                document.getElementById('selected-ssid-label').textContent = val;
+                document.getElementById('password-section').classList.remove('hidden');
+            }
+        }
+
+        async function connectWifi() {
+            const password = document.getElementById('password-input').value;
+            const btn = document.getElementById('connect-btn');
+            const error = document.getElementById('error-msg');
+
+            if (!selectedSsid) {
+                showError('Please select a network first.');
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            error.classList.add('hidden');
+
+            try {
+                const resp = await fetch('/api/wifi/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ssid: selectedSsid, password: password })
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok && data.success) {
+                    // Show success
+                    document.getElementById('setup-form').classList.add('hidden');
+                    document.getElementById('success-screen').classList.remove('hidden');
+                } else {
+                    showError(data.detail || 'Connection failed. Check password and try again.');
+                }
+            } catch (e) {
+                showError('Connection error. Please try again.');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('password-input');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        function signalBars(signal) {
+            const level = signal > 75 ? 4 : signal > 50 ? 3 : signal > 25 ? 2 : 1;
+            let bars = '';
+            for (let i = 1; i <= 4; i++) {
+                bars += `<span${i <= level ? ' class="active"' : ''}></span>`;
+            }
+            return `<div class="signal-bars">${bars}</div>`;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

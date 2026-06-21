@@ -21,10 +21,20 @@ on_chroot << EOF
 # Enable SPI using raspi-config to avoid dealing with boot partition paths
 raspi-config nonint do_spi 0
 
+# Set WiFi country to prevent RF-kill on boot
+raspi-config nonint do_wifi_country IN
+
 cd /opt/photo-frame-controller
 python3 -m venv venv
 /opt/photo-frame-controller/venv/bin/pip install -r requirements.txt
 systemctl enable bluetooth
 systemctl daemon-reload
 systemctl enable photo-frame-controller
+
+# Disable system hostapd/dnsmasq — our app manages them directly
+systemctl disable hostapd || true
+systemctl disable dnsmasq || true
+
+# Enable avahi for mDNS (photo-frame.local)
+systemctl enable avahi-daemon
 EOF

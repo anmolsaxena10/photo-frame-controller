@@ -4,8 +4,6 @@ STAGE_LIST="stage0 stage1 stage2 photo-frame"
 ENABLE_SSH=1
 FIRST_USER_NAME='saxanmol'
 FIRST_USER_PASS='saxanmol'
+WPA_COUNTRY='GB'
 CLEAN=0
 ZIP_COMPRESSION_LEVEL=1
-
-# RPi 5 requires a 64-bit image
-ARCH=arm64

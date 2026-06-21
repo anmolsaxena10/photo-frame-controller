@@ -24,6 +24,7 @@ cp -r ../../app photo-frame/files/photo-frame-controller/
 cp ../../requirements.txt photo-frame/files/photo-frame-controller/
 cp -r ../../config photo-frame/files/photo-frame-controller/
 cp -r ../../data photo-frame/files/photo-frame-controller/
+cp -r ../../web photo-frame/files/photo-frame-controller/
 
 # Copy the systemd service file to the stage root files/ directory
 cp ../../service/photo-frame-controller.service photo-frame/files/

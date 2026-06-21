@@ -110,9 +110,8 @@ class OTAUpdater:
                     self.state_manager.save()
                 
                 # Restart the systemd service
-                # Note: The service name in the user's README is 'photo-frame'
                 logger.info("Restarting service...")
-                subprocess.Popen(["sudo", "systemctl", "restart", "photo-frame"])
+                subprocess.Popen(["sudo", "systemctl", "restart", "photo-frame-controller"])
                 
                 return True
                 

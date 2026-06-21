@@ -10,3 +10,11 @@ pkg-config
 python3-dev
 libgirepository1.0-dev
 libcairo2-dev
+python3-lgpio
+python3-gpiozero
+hostapd
+dnsmasq
+network-manager
+avahi-daemon
+iw
+fonts-dejavu-core

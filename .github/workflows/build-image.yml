@@ -77,6 +77,8 @@ jobs:
             gpg \
             pigz \
             arch-test
+          # Ensure binfmt is enabled for arm64 emulation
+          sudo update-binfmts --enable || true
           # Save downloaded .debs for next run
           mkdir -p ~/apt-cache
           cp /var/cache/apt/archives/*.deb ~/apt-cache/ 2>/dev/null || true

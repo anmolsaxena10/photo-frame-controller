@@ -1,81 +1,141 @@
 # E-Ink Photo Frame Controller
 
-A local-first, lightweight controller for a Waveshare 7.3" 7-color e-Paper display running on a Raspberry Pi Zero 2W.
+A local-first, lightweight controller for a Waveshare 7.3" 7-color e-Paper display running on a Raspberry Pi.
 
-**Hardware Details:**
-- **Photo frame**: [7.3inch e-Paper HAT (F) Manual](https://www.waveshare.com/wiki/7.3inch_e-Paper_HAT_(F)_Manual#Working_With_Raspberry_Pi)
-- **Controller**: Raspberry Pi Zero 2W
+**Hardware:**
+- **Display**: [Waveshare 7.3inch e-Paper HAT (F)](https://www.waveshare.com/wiki/7.3inch_e-Paper_HAT_(F)_Manual#Working_With_Raspberry_Pi)
+- **Controller**: Raspberry Pi Zero 2W (also tested on Pi 5)
+- **SPI switch on HAT**: Must be set to **4-line SPI**
 
-## Goals
-1. **First time start**: Show a default setup image and spin up a local WiFi Hotspot (`PhotoFrame-XXXX`).
-2. **Setup via PWA**: Connect to the AP and open the captive portal (Web UI) to crop, dither, and upload photos.
-3. **Subsequent runs**: The RPi cycles through uploaded photos locally, adhering to the strict hardware refresh limits (180s minimum).
-4. **OTA Updates**: Automatically checks GitHub releases to download and extract updates to keep the frame logic fresh.
-5. **Reset**: Holding the physical button (GPIO 17) for 3 seconds triggers a factory reset.
+## Architecture
+
+```mermaid
+graph TD
+    Service[photo-frame-controller service] --> FastAPI[FastAPI port 80]
+    FastAPI --> WiFiAPI[/api/wifi]
+    FastAPI --> PhotosAPI[/api/photos]
+    FastAPI --> SettingsAPI[/api/settings]
+    Service --> DisplayMgr[Display Manager - SPI/GPIO]
+    Service --> WiFiMgr[WiFi Manager - hostapd/dnsmasq/nmcli]
+    DisplayMgr --> EPD[7.3 inch E-Ink 800x480 7-color]
+```
+
+## User Flow
+
+### First Boot
+1. Pi creates WiFi AP: `PhotoFrame-XXXX`
+2. E-ink display shows setup screen with WiFi QR code
+3. User scans QR (auto-connects phone to AP)
+4. Opens `http://192.168.4.1` → WiFi setup page
+5. User selects home WiFi network and enters password
+6. Pi connects to home WiFi, tears down AP, restarts service
+
+### Normal Operation
+- Frame cycles through uploaded photos on a configurable interval
+- Access web UI via `http://photo-frame.local` (mDNS) or the Pi's IP
+- Upload/crop/preview photos through the web interface
+- 7-color Floyd-Steinberg dithering preview before upload
+
+### Factory Reset
+- Hold GPIO27 button for 3+ seconds → resets to first-boot state
 
 ---
 
-## 🛠 Local Development & Testing
+## Local Development
 
-You do not need the physical E-Ink display to test the web interface and API locally. The application gracefully falls back when the hardware driver is not detected.
+No physical display needed — the app falls back gracefully when hardware is unavailable.
 
 ### Prerequisites
 - Python 3.10+
-- Node/NPM (Optional, if you wish to use local web development tools, but the Web UI is currently Vanilla HTML/JS)
 
-### Dev Setup
-1. Clone the repository:
-   ```bash
-   git clone <your_repo> eink-frame
-   cd eink-frame
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-### Running Locally
-To test the backend and the Web UX without triggering hardware errors:
+### Setup
 ```bash
-# This starts the FastAPI server locally on port 8000, bypassing hardware (GPIO/AP Mode/EPD)
-ENV=dev python3 app/main.py
-```
-
-- **Open Web UX:** Open your browser and navigate to `http://localhost:8000`. 
-- **Test Cropper & Dithering:** You can upload an image, test the Cropper.js interface, and view the Floyd-Steinberg 7-color Web Worker preview right in your browser.
-- **Data Storage:** Uploaded photos and state will be saved in the local `data/` directory inside the project root.
-
----
-
-## 🚀 Raspberry Pi Setup (Production)
-
-### 1. Dependencies
-```bash
-sudo apt update
-sudo apt install -y python3-venv python3-pip git dnsmasq hostapd
-```
-
-### 2. Python Environment
-```bash
-cd /opt
-sudo git clone <your_repo> eink-frame
-cd eink-frame
-
+git clone <repo> photo-frame-controller
+cd photo-frame-controller
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Service Setup
+### Running
 ```bash
-sudo cp service/photo-frame.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable photo-frame
-sudo systemctl start photo-frame
+ENV=dev python3 app/main.py
 ```
-*(Note: Ensure the service user has privileges to run hostapd/dnsmasq and interact with GPIO).*
+Opens at `http://localhost:8000`. Bypasses GPIO, AP mode, and e-ink hardware.
+
+---
+
+## Production (OS Image Build)
+
+The project uses [pi-gen](https://github.com/RPi-Distro/pi-gen) to produce a complete SD card image.
+
+### Building
+```bash
+cd image-builder
+chmod +x build.sh
+sudo ./build.sh
+```
+
+Or via GitHub Actions: push a tag `v*.*.*` to trigger the build workflow.
+
+### Image contents
+- Bookworm Lite base (stages 0-2)
+- Custom `photo-frame` stage: installs dependencies, copies app, enables service
+- Packages: `hostapd`, `dnsmasq`, `network-manager`, `avahi-daemon`, `bluez`, `python3-gpiozero`, `python3-lgpio`
+- Service runs as root (requires GPIO, SPI, network management)
+
+### Key config
+| File | Purpose |
+|------|---------|
+| `image-builder/config` | pi-gen build config |
+| `image-builder/stage-photo-frame/` | Custom stage (packages, install script) |
+| `service/photo-frame-controller.service` | systemd unit |
+
+---
+
+## Hardware Notes
+
+- **SPI switch**: Must be **4-line SPI** (the waveshare driver uses a separate DC pin)
+- **GPIO usage**:
+  - GPIO17 — E-ink RST (display reset)
+  - GPIO25 — E-ink DC (data/command)
+  - GPIO8  — E-ink CS (chip select, SPI CE0)
+  - GPIO24 — E-ink BUSY
+  - GPIO18 — E-ink PWR
+  - GPIO10 — SPI MOSI
+  - GPIO11 — SPI SCLK
+  - GPIO27 — Physical reset button (pull-up, active low)
+- **Power supply**: Pi 5 requires USB-C PD 5V/5A. Underpowered supply causes solid red LED with no boot.
+- **WiFi country**: Must be set (`WPA_COUNTRY` in pi-gen config) or WiFi stays RF-killed on boot.
+
+---
+
+## Project Structure
+
+```
+├── app/
+│   ├── controller/        # Hardware & logic managers
+│   │   ├── button_handler.py
+│   │   ├── display_manager.py
+│   │   ├── layout_engine.py
+│   │   ├── ota_updater.py
+│   │   ├── scheduler.py
+│   │   ├── state_manager.py
+│   │   └── wifi_manager.py
+│   ├── server/            # FastAPI app & routes
+│   │   ├── app.py
+│   │   ├── schemas.py
+│   │   └── routes/
+│   ├── waveshare_epd/     # Display driver library
+│   └── main.py            # Entry point
+├── web/                   # Frontend (vanilla HTML/JS)
+│   ├── index.html         # Main UI (upload/gallery/settings)
+│   ├── setup.html         # WiFi setup page (self-contained, no CDN)
+│   ├── css/
+│   └── js/
+├── config/                # Default state
+├── data/                  # Runtime data (images, state.json)
+├── image-builder/         # pi-gen build scripts
+├── service/               # systemd unit file
+└── requirements.txt
+```
