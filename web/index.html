@@ -3,67 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Photo Frame Setup</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <!-- Cropper.js for image editing -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <title>Photo Frame</title>
+
+    <!-- Material Symbols Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0">
+    <!-- Inter font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <!-- App styles -->
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div id="app">
-        <header>
-            <h1>Photo Frame</h1>
-        </header>
+        <!-- Side Navigation (desktop) -->
+        <aside class="side-nav">
+            <div class="side-nav__brand">
+                <span class="material-symbols-rounded side-nav__logo">photo_frame</span>
+                <span class="side-nav__title">Photo Frame</span>
+            </div>
+            <nav class="side-nav__links">
+                <a href="#" data-target="upload-view" class="side-nav__item active">
+                    <span class="material-symbols-rounded">add_circle</span>
+                    <span>Upload</span>
+                </a>
+                <a href="#" data-target="gallery-view" class="side-nav__item">
+                    <span class="material-symbols-rounded">photo_library</span>
+                    <span>Gallery</span>
+                </a>
+                <a href="#" data-target="settings-view" class="side-nav__item">
+                    <span class="material-symbols-rounded">settings</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
 
-        <main id="content">
-            <!-- Setup Wizard / Upload View -->
-            <div id="upload-view" class="view active">
-                <h2>Upload Photos</h2>
-                <div class="upload-container">
-                    <input type="file" id="file-input" accept="image/*" multiple>
-                    <label for="file-input" class="btn primary">Select Photos</label>
+        <!-- Main Area -->
+        <div class="main-area">
+            <!-- Top App Bar (mobile only) -->
+            <header class="top-bar">
+                <h1 class="top-bar__title">Photo Frame</h1>
+            </header>
+
+            <!-- Main Content -->
+            <main id="content">
+                <!-- Upload View -->
+                <div id="upload-view" class="view active">
+                    <div class="view__header">
+                        <h2>Upload Photos</h2>
+                        <p class="text-muted">Crop and preview for your 7-color e-ink display</p>
+                    </div>
+
+                    <div class="upload-zone" id="upload-zone">
+                        <span class="material-symbols-rounded upload-zone__icon">add_photo_alternate</span>
+                        <p class="upload-zone__text">Drop photos here or tap to select</p>
+                        <p class="upload-zone__hint">JPG, PNG — will be cropped to 800×480</p>
+                        <input type="file" id="file-input" accept="image/*" multiple>
+                    </div>
+
+                    <div class="recent-uploads" id="recent-uploads">
+                        <!-- Populated after successful uploads -->
+                    </div>
                 </div>
-                
-                <div id="editor-modal" class="hidden">
-                    <div class="editor-content">
-                        <h3>Edit Photo</h3>
-                        <div class="cropper-container">
-                            <img id="image-to-crop" src="">
-                        </div>
-                        <div class="controls">
-                            <button id="btn-rotate" class="btn secondary">Rotate</button>
-                            <button id="btn-preview" class="btn secondary">Dither Preview</button>
-                            <button id="btn-upload" class="btn primary">Confirm & Upload</button>
-                        </div>
-                        <div class="preview-container hidden">
-                            <h4>7-Color E-Ink Preview</h4>
-                            <canvas id="dither-preview-canvas"></canvas>
+
+                <!-- Gallery View -->
+                <div id="gallery-view" class="view">
+                    <div class="view__header">
+                        <h2>Gallery</h2>
+                        <p class="text-muted">Manage your uploaded photos</p>
+                    </div>
+                    <div id="gallery-grid" class="gallery-grid">
+                        <div class="gallery-loading">
+                            <span class="material-symbols-rounded spin">progress_activity</span>
+                            <p>Loading photos...</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view">
+                    <div class="view__header">
+                        <h2>Settings</h2>
+                        <p class="text-muted">Configure your photo frame</p>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="settings-card">
+                            <div class="settings-card__header">
+                                <span class="material-symbols-rounded">slideshow</span>
+                                <div>
+                                    <h3>Slideshow</h3>
+                                    <p class="text-muted">How photos cycle on your frame</p>
+                                </div>
+                            </div>
+                            <div class="settings-card__body">
+                                <div class="setting-row">
+                                    <label for="carousel-enabled">Enable slideshow</label>
+                                    <label class="toggle">
+                                        <input type="checkbox" id="carousel-enabled" checked>
+                                        <span class="toggle__slider"></span>
+                                    </label>
+                                </div>
+                                <div class="setting-row">
+                                    <label for="carousel-mode">Play order</label>
+                                    <select id="carousel-mode" class="select-input">
+                                        <option value="sequential">Sequential</option>
+                                        <option value="random">Random</option>
+                                    </select>
+                                </div>
+                                <div class="setting-row">
+                                    <label for="refresh-interval">Refresh every</label>
+                                    <select id="refresh-interval" class="select-input">
+                                        <option value="3">3 minutes</option>
+                                        <option value="5">5 minutes</option>
+                                        <option value="15">15 minutes</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="60">1 hour</option>
+                                        <option value="120">2 hours</option>
+                                        <option value="240">4 hours</option>
+                                        <option value="480">8 hours</option>
+                                        <option value="720">12 hours</option>
+                                        <option value="1440">24 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="settings-card__header">
+                                <span class="material-symbols-rounded">system_update</span>
+                                <div>
+                                    <h3>System</h3>
+                                    <p class="text-muted" id="ota-status">Firmware updates</p>
+                                </div>
+                            </div>
+                            <div class="settings-card__body">
+                                <div class="setting-row">
+                                    <span id="version-label">Version: —</span>
+                                    <button id="btn-check-update" class="btn btn--tonal btn--sm">
+                                        <span class="material-symbols-rounded">refresh</span>
+                                        Check Updates
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom Navigation (mobile only) -->
+            <nav class="bottom-nav">
+                <a href="#" data-target="upload-view" class="bottom-nav__item active">
+                    <span class="material-symbols-rounded">add_circle</span>
+                    <span class="bottom-nav__label">Upload</span>
+                </a>
+                <a href="#" data-target="gallery-view" class="bottom-nav__item">
+                    <span class="material-symbols-rounded">photo_library</span>
+                    <span class="bottom-nav__label">Gallery</span>
+                </a>
+                <a href="#" data-target="settings-view" class="bottom-nav__item">
+                    <span class="material-symbols-rounded">settings</span>
+                    <span class="bottom-nav__label">Settings</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Editor Modal (shared, always on top) -->
+    <div id="editor-modal" class="modal hidden">
+        <div class="modal__scrim"></div>
+        <div class="modal__container">
+            <div class="modal__header">
+                <h3>Edit Photo <span id="photo-counter" class="text-muted"></span></h3>
+                <button id="btn-close-modal" class="btn-icon" aria-label="Close">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
             </div>
-            
-            <div id="gallery-view" class="view">
-                <h2>Gallery</h2>
-                <p>Gallery coming soon...</p>
-                <div id="gallery-grid" class="grid"></div>
-            </div>
-            
-            <div id="settings-view" class="view">
-                <h2>Settings</h2>
-                <div class="card">
-                    <h3>OTA Updates</h3>
-                    <button id="btn-check-update" class="btn secondary">Check for Updates</button>
-                    <p id="ota-status"></p>
+            <div class="modal__body">
+                <div class="cropper-wrapper">
+                    <img id="image-to-crop" src="">
+                </div>
+                <div class="preview-container hidden">
+                    <p class="preview-label">7-Color E-Ink Preview</p>
+                    <canvas id="dither-preview-canvas"></canvas>
                 </div>
             </div>
-        </main>
+            <div class="modal__actions">
+                <button id="btn-rotate" class="btn btn--outline">
+                    <span class="material-symbols-rounded">rotate_right</span>
+                    Rotate
+                </button>
+                <button id="btn-preview" class="btn btn--tonal">
+                    <span class="material-symbols-rounded">palette</span>
+                    Preview
+                </button>
+                <button id="btn-upload" class="btn btn--filled">
+                    <span class="material-symbols-rounded">cloud_upload</span>
+                    Upload
+                </button>
+            </div>
+        </div>
+    </div>
 
-        <nav class="bottom-nav">
-            <a href="#" data-target="upload-view" class="nav-item active">Upload</a>
-            <a href="#" data-target="gallery-view" class="nav-item">Gallery</a>
-            <a href="#" data-target="settings-view" class="nav-item">Settings</a>
-        </nav>
+    <!-- Delete Confirmation -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal__scrim"></div>
+        <div class="modal__container modal__container--sm">
+            <div class="modal__header">
+                <h3>Delete Photo</h3>
+            </div>
+            <div class="modal__body">
+                <p>This will permanently remove the photo from your frame. Continue?</p>
+            </div>
+            <div class="modal__actions">
+                <button id="btn-cancel-delete" class="btn btn--outline">Cancel</button>
+                <button id="btn-confirm-delete" class="btn btn--filled btn--danger">Delete</button>
+            </div>
+        </div>
     </div>
 
     <script src="/js/app.js"></script>

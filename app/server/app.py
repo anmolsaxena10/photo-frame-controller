@@ -11,9 +11,10 @@ def create_app(state_manager) -> FastAPI:
 
     app.state.state_manager = state_manager
     
-    from app.server.routes import system, photos
+    from app.server.routes import system, photos, settings
     app.include_router(system.router, prefix="/api/system", tags=["System"])
     app.include_router(photos.router, prefix="/api/photos", tags=["Photos"])
+    app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 
     # We will mount static files and add routers later in the implementation.
     web_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "web")
